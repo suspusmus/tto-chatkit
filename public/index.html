@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TTOBMA Assistant</title>
+  <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js" async></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f3f4f6;
+    }
+    #my-chat {
+      width: 420px;
+      height: 640px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="my-chat"></div>
+
+  <script>
+    function initChatKit() {
+      const chatkitElement = document.getElementById("my-chat");
+
+      if (!chatkitElement || !chatkitElement.setOptions) {
+        return setTimeout(initChatKit, 100);
+      }
+
+      chatkitElement.setOptions({
+        api: {
+          async getClientSecret(currentClientSecret) {
+            if (!currentClientSecret) {
+              const res = await fetch("/api/chatkit/session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user: "demo-user-" + crypto.randomUUID() })
+              });
+              const { client_secret } = await res.json();
+              return client_secret;
+            }
+            return currentClientSecret;
+          }
+        }
+      });
+    }
+
+    window.addEventListener("load", initChatKit);
+  </script>
+</body>
+</html>
